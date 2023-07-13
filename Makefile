@@ -5,11 +5,10 @@ lotto-php-service := "lotto_php"
 current-dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 lotto-bin-location := "./bin"
 lotto-console-location := "./bin/console"
-env-file := "./.env.local"
 
 # 🐳 Docker Compose
-.PHONY: up
-up: CMD=--env-file $(env-file) up -d
+.PHONY: upd
+upd: CMD=up -d
 
 .PHONY: stop
 stop: CMD=stop
@@ -49,7 +48,7 @@ composer-require-module: INTERACTIVE=-ti --interactive
 # Usage: `make doco CMD="ps --services"`
 # Usage: `make doco CMD="build --parallel --pull --force-rm --no-cache"`
 .PHONY: doco
-doco up prod stop down: composer-env-file
+doco upd prod stop down: composer-env-file
 	@docker-compose $(CMD)
 
 .PHONY: rebuild

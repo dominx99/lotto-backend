@@ -1,0 +1,45 @@
+version: "3"
+services:
+  lotto_php:
+    build:
+      context: ./
+      target: php
+      dockerfile: ./docker/php/Dockerfile-prod
+    image: ghcr.io/dominx99/lotto-php
+    working_dir: /application
+    depends_on:
+      - lotto_db
+    networks:
+      proxy:
+        ipv4_address: 10.200.17.2
+
+  lotto_nginx:
+    build:
+      context: ./
+      target: nginx
+      dockerfile: ./docker/php/Dockerfile-prod
+    image: ghcr.io/dominx99/lotto-nginx
+    depends_on:
+      - lotto_php
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.lotto_backend.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.lotto_backend.tls.certresolver=lets_encrypt_resolver"
+    networks:
+      proxy:
+        ipv4_address: 10.200.17.3
+
+  lotto_db:
+    image: mysql:8.0.31
+    volumes:
+      - ./../data/lotto/mysql:/var/lib/mysql
+    env_file:
+      - database.env
+    networks:
+      proxy:
+        ipv4_address: 10.200.17.4
+
+networks:
+  proxy:
+    external: true
